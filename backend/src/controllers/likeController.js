@@ -5,15 +5,28 @@ module.exports = {
 
         let userId = req.headers.user;
 
-        let targetid = req.params.devId;
+        let targetId = req.params.devId;
 
         const loggedDev = await dev.findById(userId);
-        const targetDev = await dev.findById(targetid);
+        const targetDev = await dev.findById(targetId);
 
         if(!targetDev) return res.status(400).json('Dev not exists!');
 
 
-        if(targetDev.likes.includes(userId)) console.log('Deu match')
+        if(targetDev.likes.includes(userId)) {
+
+            console.log("Deu match")
+            
+            const loggedSocket = req.connectedUsers[userId];
+            const targetSocket = req.connectedUsers[targetId];
+
+            if(loggedSocket) req.io.to(loggedSocket).emit('match', loggedDev)
+            
+
+            if(targetSocket) req.io.to(targetSocket).emit('match', targetDev)
+            
+
+        }
         
         loggedDev.likes.push(targetDev._id);
 
